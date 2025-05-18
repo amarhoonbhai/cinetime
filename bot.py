@@ -73,7 +73,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "❂ *Welcome to CineNotify Bot!* ❂\n\n"
         "I’ll notify you on the *release date* of new movies.\n"
         "Use /getupcoming to explore what’s coming soon.\n\n"
-        f"{@cinetimetv}",
+        f"{CHANNEL_TAG}",
         parse_mode=ParseMode.MARKDOWN
     )
 
