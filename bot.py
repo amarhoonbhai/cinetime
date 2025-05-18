@@ -3,14 +3,15 @@ import requests
 import sqlite3
 from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
-from telegram import Update, ParseMode
+from telegram import Update
+from telegram.constants import ParseMode
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
 # === CONFIG ===
 TMDB_API_KEY = '2b6c2cf9a9b9e6e8f6e41db07e5eacf3'  # Demo TMDB API key
-BOT_TOKEN = '7962441355:AAFW8trGb4UPOUYrs2UdyL8J-Vg4iCS9r-c'  # Replace with your Telegram bot token
+BOT_TOKEN = '7962441355:AAHIMWPR5n3T-FOj4U62nfF6yUiElAvPxuE'  # Replace with your bot token
 DB_PATH = 'movienotify.db'
-CHANNEL_TAG = "Join @CinetimeTv"
+CHANNEL_TAG = "❂ Join @Cinetimetv"
 
 # === LOGGING ===
 logging.basicConfig(level=logging.INFO)
@@ -69,22 +70,22 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = str(update.effective_user.id)
     add_user(user_id)
     await update.message.reply_text(
-        "Welcome to *CineNotify Bot*!\n\n"
+        "❂ *Welcome to CineNotify Bot!* ❂\n\n"
         "I’ll notify you on the *release date* of new movies.\n"
-        "Use /getupcoming to see what’s coming soon.\n\n"
-        f"➡️ {CHANNEL_TAG}",
+        "Use /getupcoming to explore what’s coming soon.\n\n"
+        f"{@cinetimetv}",
         parse_mode=ParseMode.MARKDOWN
     )
 
 async def getupcoming(update: Update, context: ContextTypes.DEFAULT_TYPE):
     grouped = get_upcoming_movies()
-    message = ""
+    message = "❂ *Upcoming Movies* ❂\n"
     for month, movies in grouped.items():
-        message += f"\n🎬 *{month}*\n"
+        message += f"\n*{month}*\n"
         for title, date in movies:
             dt = datetime.strptime(date, "%Y-%m-%d").strftime("%b %d")
             message += f"• {title} – {dt}\n"
-    message += f"\n➡️ {CHANNEL_TAG}"
+    message += f"\n{CHANNEL_TAG}"
     await update.message.reply_text(message, parse_mode=ParseMode.MARKDOWN)
 
 # === DAILY NOTIFIER ===
@@ -92,8 +93,8 @@ async def notify_release_today(app):
     titles = get_movies_releasing_today()
     if not titles:
         return
-    msg = "*New Releases Today:*\n" + "\n".join(f"• {t}" for t in titles)
-    msg += f"\n\n➡️ {CHANNEL_TAG}\n— CineNotify Bot"
+    msg = "❂ *New Releases Today* ❂\n" + "\n".join(f"• {t}" for t in titles)
+    msg += f"\n\n{CHANNEL_TAG}\n— CineNotify Bot"
 
     users = get_all_users()
     for user_id in users:
@@ -114,11 +115,10 @@ async def main():
     scheduler.add_job(lambda: app.create_task(notify_release_today(app)), 'cron', hour=10)
     scheduler.start()
 
-    logger.info("CineNotify Bot is running...")
+    logger.info("❂ CineNotify Bot is running...")
     await app.run_polling()
 
 # === RUN ===
 if __name__ == '__main__':
     import asyncio
     asyncio.run(main())
-  
