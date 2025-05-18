@@ -9,7 +9,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
 # === CONFIG ===
 TMDB_API_KEY = '2b6c2cf9a9b9e6e8f6e41db07e5eacf3'  # Demo TMDB API key
-BOT_TOKEN = '7962441355:AAHIMWPR5n3T-FOj4U62nfF6yUiElAvPxuE'  # Replace with your bot token
+BOT_TOKEN = '7962441355:AAHVCfc_xJj0Y3LORZWrBo_knu2jDdMycBE'  # Replace with your bot token
 DB_PATH = 'movienotify.db'
 CHANNEL_TAG = "❂ Join @Cinetimetv"
 
@@ -121,4 +121,5 @@ async def main():
 # === RUN ===
 if __name__ == '__main__':
     import asyncio
-    asyncio.run(main())
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
