@@ -5,11 +5,13 @@ from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 from telegram import Update
 from telegram.constants import ParseMode
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+from telegram.ext import (
+    ApplicationBuilder, CommandHandler, ContextTypes
+)
 
 # === CONFIG ===
-TMDB_API_KEY = '2b6c2cf9a9b9e6e8f6e41db07e5eacf3'  # Demo TMDB API key
-BOT_TOKEN = '7962441355:AAHVCfc_xJj0Y3LORZWrBo_knu2jDdMycBE'  # Replace with your bot token
+TMDB_API_KEY = '2b6c2cf9a9b9e6e8f6e41db07e5eacf3'  # Demo TMDB key
+BOT_TOKEN = '7962441355:AAGrcFDWjFKVJjJjhX8136r10_MBm9UY3DI'
 DB_PATH = 'movienotify.db'
 CHANNEL_TAG = "❂ Join @Cinetimetv"
 
@@ -66,10 +68,10 @@ def get_movies_releasing_today():
     return [movie['title'] for movie in response.get('results', [])]
 
 # === TELEGRAM COMMANDS ===
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = str(update.effective_user.id)
     add_user(user_id)
-    await update.message.reply_text(
+    update.message.reply_text(
         "❂ *Welcome to CineNotify Bot!* ❂\n\n"
         "I’ll notify you on the *release date* of new movies.\n"
         "Use /getupcoming to explore what’s coming soon.\n\n"
@@ -77,7 +79,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode=ParseMode.MARKDOWN
     )
 
-async def getupcoming(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def getupcoming(update: Update, context: ContextTypes.DEFAULT_TYPE):
     grouped = get_upcoming_movies()
     message = "❂ *Upcoming Movies* ❂\n"
     for month, movies in grouped.items():
@@ -86,10 +88,9 @@ async def getupcoming(update: Update, context: ContextTypes.DEFAULT_TYPE):
             dt = datetime.strptime(date, "%Y-%m-%d").strftime("%b %d")
             message += f"• {title} – {dt}\n"
     message += f"\n{CHANNEL_TAG}"
-    await update.message.reply_text(message, parse_mode=ParseMode.MARKDOWN)
+    update.message.reply_text(message, parse_mode=ParseMode.MARKDOWN)
 
-# === DAILY NOTIFIER ===
-async def notify_release_today(app):
+def notify_release_today(app):
     titles = get_movies_releasing_today()
     if not titles:
         return
@@ -99,12 +100,12 @@ async def notify_release_today(app):
     users = get_all_users()
     for user_id in users:
         try:
-            await app.bot.send_message(chat_id=user_id, text=msg, parse_mode=ParseMode.MARKDOWN)
+            app.bot.send_message(chat_id=user_id, text=msg, parse_mode=ParseMode.MARKDOWN)
         except Exception as e:
             logger.warning(f"Failed to send to {user_id}: {e}")
 
 # === MAIN ===
-async def main():
+def main():
     init_db()
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
@@ -112,14 +113,12 @@ async def main():
     app.add_handler(CommandHandler("getupcoming", getupcoming))
 
     scheduler = BackgroundScheduler()
-    scheduler.add_job(lambda: app.create_task(notify_release_today(app)), 'cron', hour=10)
+    scheduler.add_job(lambda: notify_release_today(app), 'cron', hour=10)
     scheduler.start()
 
     logger.info("❂ CineNotify Bot is running...")
-    await app.run_polling()
+    app.run_polling()
 
 # === RUN ===
 if __name__ == '__main__':
-    import asyncio
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    main()
